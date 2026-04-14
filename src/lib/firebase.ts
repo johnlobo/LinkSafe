@@ -3,14 +3,14 @@ import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
+// Your web app's Firebase configuration
 const firebaseConfig = {
-  projectId: 'linksafe-dg5bq',
-  appId: '1:793839426344:web:8f6f88b012a00b0af00e1d',
-  storageBucket: 'linksafe-dg5bq.firebasestorage.app',
-  apiKey: 'AIzaSyBzhvxseOkSsfSPNd19qyOxkma4Lk6hoG8',
-  authDomain: 'linksafe-dg5bq.firebaseapp.com',
-  measurementId: '',
-  messagingSenderId: '793839426344',
+  apiKey: "AIzaSyBzhvxseOkSsfSPNd19qyOxkma4Lk6hoG8",
+  authDomain: "linksafe-dg5bq.firebaseapp.com",
+  projectId: "linksafe-dg5bq",
+  storageBucket: "linksafe-dg5bq.firebasestorage.app",
+  messagingSenderId: "793839426344",
+  appId: "1:793839426344:web:8f6f88b012a00b0af00e1d"
 };
 
 // Initialize Firebase
