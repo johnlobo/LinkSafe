@@ -1,13 +1,18 @@
 const isDev = process.env.NODE_ENV === 'development';
+const BASE_PATH = isDev ? '/proxy/9002' : '';
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  skipTrailingSlashRedirect: true,
   // code-server proxy config — dev only (production runs at root via reverse proxy)
   ...(isDev && {
-    basePath: '/proxy/9002',
+    basePath: BASE_PATH,
     allowedDevOrigins: ['code-server.digitalpartners.es'],
   }),
+  env: {
+    NEXT_PUBLIC_APP_BASEPATH: BASE_PATH,
+  },
   webpack: (config) => {
     config.resolve.alias['@opentelemetry/exporter-jaeger'] = false;
     return config;

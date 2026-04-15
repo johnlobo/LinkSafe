@@ -1,7 +1,6 @@
 'use client';
 
 import { Globe, MoreVertical, Edit, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,7 +33,7 @@ export function BookmarkCard({ bookmark, onEdit, onDelete }: BookmarkCardProps) 
         <div className="flex items-start gap-4">
           <div className="relative mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md border bg-card">
             {bookmark.favicon && !faviconError ? (
-              <Image
+              <img
                 src={bookmark.favicon}
                 alt={`${bookmark.title} favicon`}
                 width={20}

@@ -86,14 +86,11 @@ export function AddBookmarkDialog({
         const result = await autoFillBookmarkDetails({ url });
         if (result.title) {
           form.setValue('title', result.title, { shouldValidate: true });
+          toast({ title: 'Details fetched', description: result.title });
         }
-        // Favicon handling would be done in the onSave function
-        toast({ title: 'Success', description: 'Website details fetched.' });
       } catch (error) {
-        // Ignore invalid URL error, zod will catch it
-        if (!(error instanceof TypeError)) {
-          toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch website details.' });
-        }
+        // Silently ignore — user can fill title manually
+        console.warn('autoFill failed:', error);
       } finally {
         setIsFetching(false);
       }

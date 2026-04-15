@@ -1,6 +1,7 @@
 services:
   linksafe:
-    image: ghcr.io/${GITHUB_REPOSITORY}:latest
+    image: ghcr.io/johnlobo/linksafe:latest
+    container_name: linksafe
     restart: unless-stopped
     ports:
       - "3000:3000"

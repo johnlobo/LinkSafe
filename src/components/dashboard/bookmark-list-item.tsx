@@ -1,7 +1,6 @@
 'use client';
 
 import { Globe, MoreVertical, Edit, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -36,7 +35,7 @@ export function BookmarkListItem({ bookmark, onEdit, onDelete }: BookmarkListIte
     >
       <div className="relative flex h-6 w-6 flex-shrink-0 items-center justify-center">
         {bookmark.favicon && !faviconError ? (
-          <Image
+          <img
             src={bookmark.favicon}
             alt={`${bookmark.title} favicon`}
             width={16}
