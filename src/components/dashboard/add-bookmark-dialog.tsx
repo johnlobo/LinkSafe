@@ -15,7 +15,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -34,7 +33,6 @@ const bookmarkSchema = z.object({
 type BookmarkFormValues = z.infer<typeof bookmarkSchema>;
 
 type AddBookmarkDialogProps = {
-  children: React.ReactNode;
   bookmark?: Bookmark | null;
   onSave: (bookmark: Omit<Bookmark, 'id' | 'createdAt'>, id?: string) => void;
   mode: 'add' | 'edit';
@@ -44,7 +42,6 @@ type AddBookmarkDialogProps = {
 };
 
 export function AddBookmarkDialog({
-  children,
   bookmark,
   onSave,
   mode,
@@ -74,6 +71,11 @@ export function AddBookmarkDialog({
         tags: bookmark?.tags ?? [],
       };
       form.reset(defaultValues);
+    } else {
+      const timer = setTimeout(() => {
+        document.body.style.removeProperty('pointer-events');
+      }, 300);
+      return () => clearTimeout(timer);
     }
   }, [open, bookmark, form]);
 
@@ -120,8 +122,7 @@ export function AddBookmarkDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogTrigger asChild>{children}</DialogTrigger>
-      <DialogContent className="sm:max-w-[525px]">
+      <DialogContent className="sm:max-w-[525px]" onCloseAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
           <DialogTitle>{mode === 'add' ? 'Add a new bookmark' : 'Edit bookmark'}</DialogTitle>
           <DialogDescription>Fill in the details below. Click save when you&apos;re done.</DialogDescription>

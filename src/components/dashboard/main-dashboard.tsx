@@ -22,6 +22,16 @@ import { BookmarkList } from './bookmark-list';
 import { Header } from './header';
 import { SidebarContent } from './sidebar-content';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -59,6 +69,7 @@ export function MainDashboard() {
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -110,6 +121,16 @@ export function MainDashboard() {
     }
   }, [dialogOpen]);
 
+  useEffect(() => {
+    if (!pendingDeleteId) {
+      const timer = setTimeout(() => {
+        document.body.style.removeProperty('pointer-events');
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingDeleteId]);
+
+
   const handleSaveBookmark = async (bookmarkData: Omit<Bookmark, 'id' | 'createdAt'>, id?: string) => {
     if (!user) {
       toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to save bookmarks.' });
@@ -154,15 +175,22 @@ export function MainDashboard() {
     setDialogOpen(true);
   };
 
-  const handleDeleteBookmark = async (id: string) => {
+  const handleDeleteBookmark = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDeleteId) return;
     try {
-      await deleteDoc(doc(db, 'bookmarks', id));
+      await deleteDoc(doc(db, 'bookmarks', pendingDeleteId));
       toast({
         title: 'Bookmark Deleted',
         description: 'The bookmark has been removed from your list.',
       });
     } catch (error: any) {
       toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } finally {
+      setPendingDeleteId(null);
     }
   };
 
@@ -275,16 +303,30 @@ export function MainDashboard() {
       </SidebarInset>
 
       <AddBookmarkDialog
-        key={dialogMode === 'add' ? 'add-bookmark' : editingBookmark?.id}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSave={handleSaveBookmark}
         mode={dialogMode}
         bookmark={editingBookmark}
         allTags={allPublicTags}
-      >
-        <div style={{ display: 'none' }} />
-      </AddBookmarkDialog>
+      />
+
+      <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete bookmark?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
     </SidebarProvider>
   );

@@ -1,5 +1,8 @@
-# Firebase Studio
+Link Safe is a Bookmark application.
+It has been developed with AI, initially with Google Firebase Studio, and lately with Calude Code.
 
-This is a NextJS starter in Firebase Studio.
+The main features are...
 
-To get started, take a look at src/app/page.tsx.
+- User management
+- Link saving
+- Intelligent title gathering from websites

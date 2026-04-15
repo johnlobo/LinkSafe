@@ -136,8 +136,11 @@ export function TagInput({ value: tags, onChange, allTags, placeholder, ...props
                             {filteredSuggestions(inputValue).map((tag) => (
                             <CommandItem
                                 key={tag}
-                                onSelect={() => handleAddTag(tag)}
                                 value={tag}
+                                onMouseDown={(e) => {
+                                  e.preventDefault();
+                                  handleAddTag(tag);
+                                }}
                             >
                                 <Check
                                     className={cn(
