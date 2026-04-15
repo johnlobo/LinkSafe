@@ -31,6 +31,7 @@ import {
 import {
   Sidebar,
   SidebarContent as SidebarUiContent,
+  SidebarFooter,
   SidebarHeader,
   SidebarInset,
   SidebarProvider,
@@ -217,6 +218,11 @@ export function MainDashboard() {
         <SidebarUiContent>
           <SidebarContent allTags={allCurrentUserTags} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
         </SidebarUiContent>
+        <SidebarFooter>
+          <p className="px-4 py-2 text-xs text-muted-foreground">
+            v{process.env.NEXT_PUBLIC_APP_VERSION}
+          </p>
+        </SidebarFooter>
       </Sidebar>
       <SidebarInset>
         <Header setSearchText={setSearchText} openAddDialog={openAddDialog} />
