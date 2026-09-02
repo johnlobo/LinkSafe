@@ -67,7 +67,9 @@ export function Header({ setSearchText, openAddDialog }: HeaderProps) {
             <DropdownMenuLabel>{user?.name || user?.email || 'My Account'}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/browser')}>
+              Browser integration
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>

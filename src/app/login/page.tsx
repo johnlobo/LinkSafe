@@ -25,7 +25,8 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login({ email, password });
-      router.push('/');
+      const requestedPath = new URLSearchParams(window.location.search).get('next');
+      router.push(requestedPath?.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/');
     } catch (error: any) {
       toast({
         variant: 'destructive',
