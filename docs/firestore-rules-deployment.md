@@ -36,5 +36,7 @@ Con dos cuentas distintas:
 3. El bookmarklet de Enlaces debe seguir pudiendo guardar un enlace HTTP o HTTPS.
 4. Una consulta de `bookmarks` sin filtro por `userId` debe ser rechazada.
 5. Una consulta filtrada con el UID autenticado debe ser aceptada.
+6. Importar un CSV con una fecha histórica válida debe crear el documento para la cuenta activa.
+7. El mismo CSV no debe poder establecer `userId`, identificadores, campos desconocidos ni fechas futuras.
 
-La colección `prompts` queda protegida y preparada, aunque su interfaz se publique en una fase posterior.
+Las colecciones `bookmarks` y `prompts` deben conservar el aislamiento entre cuentas después de publicar cualquier cambio de reglas.

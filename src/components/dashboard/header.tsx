@@ -1,7 +1,9 @@
 'use client';
 
-import { Plus, Search, User as UserIcon } from 'lucide-react';
+import { Database, Plus, Search, User as UserIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { DataTransferDialog } from '@/components/data-transfer/data-transfer-dialog';
 import { Logo } from '@/components/logo';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Button } from '@/components/ui/button';
@@ -29,6 +31,7 @@ type HeaderProps = {
 export function Header({ setSearchText, searchText, onCreate, searchPlaceholder, createLabel }: HeaderProps) {
   const router = useRouter();
   const { user, logout } = useAuth();
+  const [dataTransferOpen, setDataTransferOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
@@ -75,11 +78,16 @@ export function Header({ setSearchText, searchText, onCreate, searchPlaceholder,
             <DropdownMenuItem onClick={() => router.push('/browser')}>
               {es.account.browserIntegration}
             </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setDataTransferOpen(true)}>
+              <Database className="mr-2 h-4 w-4" />
+              {es.account.dataTransfer}
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>{es.auth.logout}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <DataTransferDialog open={dataTransferOpen} onOpenChange={setDataTransferOpen} />
     </header>
   );
 }

@@ -107,6 +107,29 @@ describe('bookmark privacy', () => {
     }));
     await assertFails(updateDoc(bookmarkRef, { userId: 'user-b' }));
   });
+
+  it('accepts historical import dates and rejects future dates or oversized fields', async () => {
+    const firestore = testEnvironment.authenticatedContext('user-a').firestore();
+
+    await assertSucceeds(setDoc(doc(firestore, 'bookmarks/historical'), {
+      ...validBookmark('user-a'),
+      createdAt: Timestamp.fromDate(new Date('2020-01-01T00:00:00.000Z')),
+    }));
+    await assertFails(setDoc(doc(firestore, 'bookmarks/future'), {
+      ...validBookmark('user-a'),
+      createdAt: Timestamp.fromMillis(Date.now() + 60_000),
+    }));
+    await assertFails(setDoc(doc(firestore, 'bookmarks/title-too-long'), {
+      ...validBookmark('user-a'),
+      title: 'x'.repeat(201),
+      createdAt: serverTimestamp(),
+    }));
+    await assertFails(setDoc(doc(firestore, 'bookmarks/tag-too-long'), {
+      ...validBookmark('user-a'),
+      tags: ['x'.repeat(51)],
+      createdAt: serverTimestamp(),
+    }));
+  });
 });
 
 describe('prompt privacy and validation', () => {
@@ -172,5 +195,25 @@ describe('prompt privacy and validation', () => {
     await assertFails(deleteDoc(otherUserRef));
     await assertFails(updateDoc(ownerRef, { userId: 'user-b', updatedAt: serverTimestamp() }));
     await assertSucceeds(updateDoc(ownerRef, { favorite: true, updatedAt: serverTimestamp() }));
+  });
+
+  it('accepts consistent historical import dates and rejects invalid date ranges', async () => {
+    const firestore = testEnvironment.authenticatedContext('user-a').firestore();
+
+    await assertSucceeds(setDoc(doc(firestore, 'prompts/historical'), {
+      ...validPrompt('user-a'),
+      createdAt: Timestamp.fromDate(new Date('2020-01-01T00:00:00.000Z')),
+      updatedAt: Timestamp.fromDate(new Date('2021-01-01T00:00:00.000Z')),
+    }));
+    await assertFails(setDoc(doc(firestore, 'prompts/reversed'), {
+      ...validPrompt('user-a'),
+      createdAt: Timestamp.fromDate(new Date('2021-01-01T00:00:00.000Z')),
+      updatedAt: Timestamp.fromDate(new Date('2020-01-01T00:00:00.000Z')),
+    }));
+    await assertFails(setDoc(doc(firestore, 'prompts/future'), {
+      ...validPrompt('user-a'),
+      createdAt: serverTimestamp(),
+      updatedAt: Timestamp.fromMillis(Date.now() + 60_000),
+    }));
   });
 });

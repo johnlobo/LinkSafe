@@ -57,7 +57,7 @@ Prompt
 - updatedAt
 ```
 
-`title` y `content` son obligatorios. Los timestamps se generan en el servidor. `updatedAt` determina el orden "Recientes" de Prompts; Enlaces conserva `createdAt`.
+`title` y `content` son obligatorios. Los timestamps se generan al crear contenido desde la interfaz; una importación CSV puede restaurar fechas históricas válidas y no futuras. `updatedAt` determina el orden "Recientes" de Prompts; Enlaces conserva `createdAt`.
 
 Límites aprobados:
 
@@ -135,6 +135,8 @@ El despliegue de reglas será manual. Codex preparará el contenido exacto y el 
 - [x] Implementar creación, detalle, edición, eliminación y protección de cambios sin guardar.
 - [x] Añadir el segundo bookmarklet y su captura segura mediante `postMessage`.
 - [x] Completar pruebas, documentación, build, release y verificación de despliegue.
+- [x] Diseñar la importación y exportación CSV común para ambas bibliotecas.
+- [ ] Publicar y verificar la importación y exportación CSV.
 
 La primera publicación compatible elimina las consultas globales de Enlaces antes de endurecer manualmente sus reglas.
 
@@ -155,7 +157,6 @@ El build no sustituye a typecheck ni lint porque la configuración actual ignora
 
 - Variables `{{nombre}}`.
 - Acción "Usar".
-- Importación y exportación.
 - Cambio de nombre de LinkSafe.
-- Detección de duplicados.
+- Detección general de duplicados fuera del flujo de importación.
 - Paginación o búsqueda mediante servidor.

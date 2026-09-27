@@ -28,11 +28,12 @@ import { es } from '@/lib/i18n/es';
 const bookmarkSchema = z.object({
   url: z
     .string()
+    .max(2_048, { message: es.bookmarks.urlMax })
     .url({ message: es.bookmarks.urlInvalid })
     .refine(isHttpUrl, { message: es.bookmarks.urlProtocol }),
-  title: z.string().min(1, { message: es.bookmarks.titleRequired }),
-  description: z.string().optional(),
-  tags: z.array(z.string()).optional(),
+  title: z.string().trim().min(1, { message: es.bookmarks.titleRequired }).max(200, { message: es.bookmarks.titleMax }),
+  description: z.string().max(5_000, { message: es.bookmarks.descriptionMax }).optional(),
+  tags: z.array(z.string().trim().min(1).max(50, es.bookmarks.tagMax)).max(20, es.bookmarks.tagsMax).optional(),
 });
 
 type BookmarkFormValues = z.infer<typeof bookmarkSchema>;

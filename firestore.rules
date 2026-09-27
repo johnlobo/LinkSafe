@@ -26,7 +26,7 @@ service cloud.firestore {
         (tags[index] is string && tags[index].size() > 0 && tags[index].size() <= 50);
     }
 
-    function validPromptTags(tags) {
+    function validTags(tags) {
       return tags is list &&
         tags.size() <= 20 &&
         validTagAt(tags, 0) && validTagAt(tags, 1) &&
@@ -48,10 +48,12 @@ service cloud.firestore {
         ]) &&
         data.userId is string &&
         data.url is string &&
+        data.url.size() <= 2048 &&
         data.url.matches('^https?://.*') &&
         data.title is string &&
         data.title.size() > 0 &&
-        data.tags is list &&
+        data.title.size() <= 200 &&
+        validTags(data.tags) &&
         data.createdAt is timestamp &&
         hasValidOptionalString(data, 'description', 5000) &&
         hasValidOptionalWebUrl(data, 'favicon', 2048) &&
@@ -73,7 +75,7 @@ service cloud.firestore {
         data.content is string &&
         data.content.size() > 0 &&
         data.content.size() <= 50000 &&
-        validPromptTags(data.tags) &&
+        validTags(data.tags) &&
         data.favorite is bool &&
         data.createdAt is timestamp &&
         data.updatedAt is timestamp &&
@@ -89,7 +91,7 @@ service cloud.firestore {
 
       allow create: if isOwner(request.resource.data) &&
         validBookmark(request.resource.data) &&
-        request.resource.data.createdAt == request.time;
+        request.resource.data.createdAt <= request.time;
 
       allow update: if isOwner(resource.data) &&
         isOwner(request.resource.data) &&
@@ -103,8 +105,9 @@ service cloud.firestore {
 
       allow create: if isOwner(request.resource.data) &&
         validPrompt(request.resource.data) &&
-        request.resource.data.createdAt == request.time &&
-        request.resource.data.updatedAt == request.time;
+        request.resource.data.createdAt <= request.time &&
+        request.resource.data.updatedAt <= request.time &&
+        request.resource.data.updatedAt >= request.resource.data.createdAt;
 
       allow update: if isOwner(resource.data) &&
         isOwner(request.resource.data) &&

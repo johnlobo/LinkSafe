@@ -31,3 +31,5 @@ npm run build
 Las pruebas de reglas requieren Java 21. Consulta [docs/firestore-rules-deployment.md](docs/firestore-rules-deployment.md) para su ejecución y publicación manual.
 
 La definición funcional y las decisiones del MVP se conservan en [docs/prompt-library-plan.md](docs/prompt-library-plan.md).
+
+La estructura y los controles de la importación y exportación están documentados en [docs/csv-import-export.md](docs/csv-import-export.md).
