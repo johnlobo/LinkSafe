@@ -1,16 +1,29 @@
 'use client';
 
-import { Tag } from 'lucide-react';
+import { Bookmark, Star, Tag } from 'lucide-react';
 import { Badge } from '../ui/badge';
+import { Button } from '../ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
 
 type SidebarContentProps = {
   allTags: string[];
   selectedTags: string[];
   setSelectedTags: (tags: string[]) => void;
+  showFavoritesOnly: boolean;
+  setShowFavoritesOnly: (showFavoritesOnly: boolean) => void;
+  totalCount: number;
+  favoriteCount: number;
 };
 
-export function SidebarContent({ allTags, selectedTags, setSelectedTags }: SidebarContentProps) {
+export function SidebarContent({
+  allTags,
+  selectedTags,
+  setSelectedTags,
+  showFavoritesOnly,
+  setShowFavoritesOnly,
+  totalCount,
+  favoriteCount,
+}: SidebarContentProps) {
   const toggleTag = (tag: string) => {
     setSelectedTags(
       selectedTags.includes(tag)
@@ -21,6 +34,31 @@ export function SidebarContent({ allTags, selectedTags, setSelectedTags }: Sideb
 
   return (
     <div className="p-4">
+      <Card className="mb-4">
+        <CardHeader className="p-4">
+          <CardTitle className="text-base">Bookmarks</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-2 p-4 pt-0">
+          <Button
+            type="button"
+            variant={!showFavoritesOnly ? 'secondary' : 'ghost'}
+            className="justify-between"
+            onClick={() => setShowFavoritesOnly(false)}
+          >
+            <span className="flex items-center gap-2"><Bookmark className="h-4 w-4" />All</span>
+            <span>{totalCount}</span>
+          </Button>
+          <Button
+            type="button"
+            variant={showFavoritesOnly ? 'secondary' : 'ghost'}
+            className="justify-between"
+            onClick={() => setShowFavoritesOnly(true)}
+          >
+            <span className="flex items-center gap-2"><Star className="h-4 w-4" />Favorites</span>
+            <span>{favoriteCount}</span>
+          </Button>
+        </CardContent>
+      </Card>
       <Card>
         <CardHeader className="p-4">
           <CardTitle className="flex items-center gap-2 text-base">

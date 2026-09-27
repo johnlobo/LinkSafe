@@ -1,7 +1,7 @@
 'use client';
 
 import { Check, X } from 'lucide-react';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import {
@@ -26,22 +26,30 @@ export function TagInput({ value: tags, onChange, allTags, placeholder, ...props
   const [inputValue, setInputValue] = useState('');
   const [selectedSuggestion, setSelectedSuggestion] = useState('');
 
+  const normalizedTags = useMemo(
+    () => new Set(tags.map((tag) => tag.trim().toLowerCase())),
+    [tags]
+  );
   const filteredSuggestions = allTags.filter(
-    (tag) => !tags.includes(tag) && tag.toLowerCase().includes(inputValue.toLowerCase())
+    (tag) =>
+      !normalizedTags.has(tag.trim().toLowerCase()) &&
+      tag.toLowerCase().includes(inputValue.toLowerCase())
   );
 
   const handleAddTag = useCallback(
     (tag: string) => {
       const newTag = tag.trim();
-      if (newTag && !tags.includes(newTag)) {
-        onChange([...tags, newTag]);
+      const key = newTag.toLowerCase();
+      const knownTag = allTags.find((candidate) => candidate.trim().toLowerCase() === key);
+      if (newTag && !normalizedTags.has(key)) {
+        onChange([...tags, knownTag || newTag]);
       }
       setInputValue('');
       setSelectedSuggestion('');
       setOpen(false);
       inputRef.current?.focus();
     },
-    [tags, onChange]
+    [allTags, normalizedTags, onChange, tags]
   );
 
   const handleRemoveTag = (tagToRemove: string) => {

@@ -22,9 +22,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import type { Bookmark } from '@/lib/types';
 import { TagInput } from './tag-input';
+import { isHttpUrl } from '@/lib/bookmark-utils';
 
 const bookmarkSchema = z.object({
-  url: z.string().url({ message: 'Please enter a valid URL.' }),
+  url: z
+    .string()
+    .url({ message: 'Please enter a valid URL.' })
+    .refine(isHttpUrl, { message: 'Only HTTP and HTTPS URLs are allowed.' }),
   title: z.string().min(1, { message: 'Title is required.' }),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),

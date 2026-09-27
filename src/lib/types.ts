@@ -6,5 +6,6 @@ export type Bookmark = {
   description?: string;
   tags: string[];
   favicon?: string;
+  favorite?: boolean;
   createdAt: string; // ISO date string
 };

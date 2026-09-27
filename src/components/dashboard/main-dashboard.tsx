@@ -5,7 +5,6 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs,
   onSnapshot,
   query,
   serverTimestamp,
@@ -51,6 +50,7 @@ import { Logo } from '../logo';
 import { Button } from '../ui/button';
 import { LayoutGrid, List, Rows3 } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { collectMetadataValues, normalizeMetadataValues } from '@/lib/bookmark-utils';
 
 export function MainDashboard() {
   const { user, loading } = useAuth();
@@ -58,9 +58,9 @@ export function MainDashboard() {
   const { toast } = useToast();
 
   const [bookmarks, setBookmarks] = useState<Bookmark[]>([]);
-  const [allPublicTags, setAllPublicTags] = useState<string[]>([]);
   const [searchText, setSearchText] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [sortOrder, setSortOrder] = useState<'date-desc' | 'date-asc' | 'title-asc' | 'title-desc'>(
     'date-desc'
   );
@@ -97,24 +97,6 @@ export function MainDashboard() {
     }
   }, [user]);
 
-  // Fetch all tags from all users for autocomplete
-  useEffect(() => {
-    const fetchAllTags = async () => {
-      const q = query(collection(db, 'bookmarks'));
-      const querySnapshot = await getDocs(q);
-      const tags = new Set<string>();
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.tags && Array.isArray(data.tags)) {
-          data.tags.forEach((tag: string) => tags.add(tag));
-        }
-      });
-      setAllPublicTags(Array.from(tags).sort());
-    };
-
-    fetchAllTags();
-  }, [bookmarks]); // Re-fetch if local bookmarks change to include new tags immediately
-
   useEffect(() => {
     if (!dialogOpen) {
       setEditingBookmark(null);
@@ -138,7 +120,10 @@ export function MainDashboard() {
     }
 
     try {
-      const dataToSave: any = { ...bookmarkData };
+      const dataToSave: any = {
+        ...bookmarkData,
+        tags: normalizeMetadataValues(bookmarkData.tags, allCurrentUserTags),
+      };
       if (dataToSave.favicon === undefined) {
         delete dataToSave.favicon;
       }
@@ -152,6 +137,7 @@ export function MainDashboard() {
         // Add
         await addDoc(collection(db, 'bookmarks'), {
           ...dataToSave,
+          favorite: dataToSave.favorite ?? false,
           userId: user.uid,
           createdAt: serverTimestamp(),
         });
@@ -179,6 +165,16 @@ export function MainDashboard() {
     setPendingDeleteId(id);
   };
 
+  const handleToggleFavorite = async (bookmark: Bookmark) => {
+    try {
+      await updateDoc(doc(db, 'bookmarks', bookmark.id), {
+        favorite: !bookmark.favorite,
+      });
+    } catch (error: any) {
+      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    }
+  };
+
   const confirmDelete = async () => {
     if (!pendingDeleteId) return;
     try {
@@ -195,24 +191,31 @@ export function MainDashboard() {
   };
 
   const allCurrentUserTags = useMemo(() => {
-    const tags = new Set<string>();
-    bookmarks.forEach((bm) => bm.tags.forEach((tag) => tags.add(tag)));
-    return Array.from(tags).sort();
+    return collectMetadataValues(bookmarks.flatMap((bookmark) => bookmark.tags));
   }, [bookmarks]);
+
+  const favoriteCount = useMemo(
+    () => bookmarks.filter((bookmark) => bookmark.favorite === true).length,
+    [bookmarks]
+  );
 
   const filteredBookmarks = useMemo(() => {
     return bookmarks
       .filter((bm) => {
         const searchLower = searchText.toLowerCase();
+        const bookmarkTags = new Set(bm.tags.map((tag) => tag.trim().toLowerCase()));
         const matchesSearch =
           bm.title.toLowerCase().includes(searchLower) ||
           bm.url.toLowerCase().includes(searchLower) ||
           (bm.description && bm.description.toLowerCase().includes(searchLower));
 
         const matchesTags =
-          selectedTags.length === 0 || selectedTags.every((tag) => bm.tags.includes(tag));
+          selectedTags.length === 0 ||
+          selectedTags.every((tag) => bookmarkTags.has(tag.trim().toLowerCase()));
 
-        return matchesSearch && matchesTags;
+        const matchesFavorites = !showFavoritesOnly || bm.favorite === true;
+
+        return matchesSearch && matchesTags && matchesFavorites;
       })
       .sort((a, b) => {
         switch (sortOrder) {
@@ -227,7 +230,7 @@ export function MainDashboard() {
             return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         }
       });
-  }, [bookmarks, searchText, selectedTags, sortOrder]);
+  }, [bookmarks, searchText, selectedTags, showFavoritesOnly, sortOrder]);
 
   if (loading || !user) {
     return (
@@ -244,7 +247,15 @@ export function MainDashboard() {
           <Logo />
         </SidebarHeader>
         <SidebarUiContent>
-          <SidebarContent allTags={allCurrentUserTags} selectedTags={selectedTags} setSelectedTags={setSelectedTags} />
+          <SidebarContent
+            allTags={allCurrentUserTags}
+            selectedTags={selectedTags}
+            setSelectedTags={setSelectedTags}
+            showFavoritesOnly={showFavoritesOnly}
+            setShowFavoritesOnly={setShowFavoritesOnly}
+            totalCount={bookmarks.length}
+            favoriteCount={favoriteCount}
+          />
         </SidebarUiContent>
         <SidebarFooter>
           <p className="px-4 py-2 text-xs text-muted-foreground">
@@ -296,6 +307,7 @@ export function MainDashboard() {
             bookmarks={filteredBookmarks}
             onEdit={openEditDialog}
             onDelete={handleDeleteBookmark}
+            onToggleFavorite={handleToggleFavorite}
             openAddDialog={openAddDialog}
             viewMode={viewMode}
           />
@@ -308,7 +320,7 @@ export function MainDashboard() {
         onSave={handleSaveBookmark}
         mode={dialogMode}
         bookmark={editingBookmark}
-        allTags={allPublicTags}
+        allTags={allCurrentUserTags}
       />
 
       <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Globe, MoreVertical, Edit, Star, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,9 +17,10 @@ type BookmarkCardProps = {
   bookmark: Bookmark;
   onEdit: (bookmark: Bookmark) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (bookmark: Bookmark) => void;
 };
 
-export function BookmarkCard({ bookmark, onEdit, onDelete }: BookmarkCardProps) {
+export function BookmarkCard({ bookmark, onEdit, onDelete, onToggleFavorite }: BookmarkCardProps) {
   const domain = new URL(bookmark.url).hostname;
   const [faviconError, setFaviconError] = useState(false);
 
@@ -59,7 +60,19 @@ export function BookmarkCard({ bookmark, onEdit, onDelete }: BookmarkCardProps) 
             <p className="text-xs text-muted-foreground">{domain}</p>
           </div>
         </div>
-        <DropdownMenu>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 flex-shrink-0"
+            aria-label={bookmark.favorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={bookmark.favorite === true}
+            onClick={() => onToggleFavorite(bookmark)}
+          >
+            <Star className={bookmark.favorite ? 'h-4 w-4 fill-primary text-primary' : 'h-4 w-4'} />
+          </Button>
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
               <MoreVertical className="h-4 w-4" />
@@ -76,7 +89,8 @@ export function BookmarkCard({ bookmark, onEdit, onDelete }: BookmarkCardProps) 
               <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
       </CardHeader>
       <CardContent className="flex flex-grow flex-col justify-between pt-0">
         <p className="mb-4 text-sm text-muted-foreground">{bookmark.description}</p>

@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Globe, MoreVertical, Edit, Star, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,9 +17,10 @@ type BookmarkListItemProps = {
   bookmark: Bookmark;
   onEdit: (bookmark: Bookmark) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (bookmark: Bookmark) => void;
 };
 
-export function BookmarkListItem({ bookmark, onEdit, onDelete }: BookmarkListItemProps) {
+export function BookmarkListItem({ bookmark, onEdit, onDelete, onToggleFavorite }: BookmarkListItemProps) {
   const domain = new URL(bookmark.url).hostname;
   const [faviconError, setFaviconError] = useState(false);
 
@@ -73,6 +74,17 @@ export function BookmarkListItem({ bookmark, onEdit, onDelete }: BookmarkListIte
       </div>
 
       <div className="flex-shrink-0">
+        <Button
+          type="button"
+          variant="ghost"
+          size="icon"
+          className="mr-1 h-8 w-8"
+          aria-label={bookmark.favorite ? 'Remove from favorites' : 'Add to favorites'}
+          aria-pressed={bookmark.favorite === true}
+          onClick={() => onToggleFavorite(bookmark)}
+        >
+          <Star className={bookmark.favorite ? 'h-4 w-4 fill-primary text-primary' : 'h-4 w-4'} />
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">

@@ -19,9 +19,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
+import { isHttpUrl, normalizeMetadataValues } from '@/lib/bookmark-utils';
 
 const schema = z.object({
-  url: z.string().url({ message: 'Please enter a valid URL.' }),
+  url: z
+    .string()
+    .url({ message: 'Please enter a valid URL.' })
+    .refine(isHttpUrl, { message: 'Only HTTP and HTTPS URLs are allowed.' }),
   title: z.string().min(1, { message: 'Title is required.' }),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
@@ -101,7 +105,8 @@ export default function AddFromBrowserPage() {
       const details = await autoFillBookmarkDetails({ url: values.url });
       const data: Record<string, unknown> = {
         ...values,
-        tags: values.tags || [],
+        tags: normalizeMetadataValues(values.tags || [], allTags),
+        favorite: false,
         userId: user.uid,
         createdAt: serverTimestamp(),
       };

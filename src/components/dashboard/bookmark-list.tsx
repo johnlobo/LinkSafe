@@ -12,11 +12,12 @@ type BookmarkListProps = {
   bookmarks: Bookmark[];
   onEdit: (bookmark: Bookmark) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (bookmark: Bookmark) => void;
   openAddDialog: () => void;
   viewMode: 'big-cards' | 'small-cards' | 'list';
 };
 
-export function BookmarkList({ bookmarks, onEdit, onDelete, openAddDialog, viewMode }: BookmarkListProps) {
+export function BookmarkList({ bookmarks, onEdit, onDelete, onToggleFavorite, openAddDialog, viewMode }: BookmarkListProps) {
   if (bookmarks.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/50 p-8 text-center">
@@ -45,12 +46,12 @@ export function BookmarkList({ bookmarks, onEdit, onDelete, openAddDialog, viewM
     <div className={containerClass}>
       {bookmarks.map((bookmark) => {
         if (viewMode === 'list') {
-          return <BookmarkListItem key={bookmark.id} bookmark={bookmark} onEdit={onEdit} onDelete={onDelete} />;
+          return <BookmarkListItem key={bookmark.id} bookmark={bookmark} onEdit={onEdit} onDelete={onDelete} onToggleFavorite={onToggleFavorite} />;
         }
         if (viewMode === 'small-cards') {
-            return <BookmarkCardSmall key={bookmark.id} bookmark={bookmark} onEdit={onEdit} onDelete={onDelete} />;
+            return <BookmarkCardSmall key={bookmark.id} bookmark={bookmark} onEdit={onEdit} onDelete={onDelete} onToggleFavorite={onToggleFavorite} />;
         }
-        return <BookmarkCard key={bookmark.id} bookmark={bookmark} onEdit={onEdit} onDelete={onDelete} />;
+        return <BookmarkCard key={bookmark.id} bookmark={bookmark} onEdit={onEdit} onDelete={onDelete} onToggleFavorite={onToggleFavorite} />;
       })}
     </div>
   );

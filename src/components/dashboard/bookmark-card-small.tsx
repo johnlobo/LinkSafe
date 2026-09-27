@@ -1,6 +1,6 @@
 'use client';
 
-import { Globe, MoreVertical, Edit, Trash2 } from 'lucide-react';
+import { Globe, MoreVertical, Edit, Star, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,9 +17,10 @@ type BookmarkCardSmallProps = {
   bookmark: Bookmark;
   onEdit: (bookmark: Bookmark) => void;
   onDelete: (id: string) => void;
+  onToggleFavorite: (bookmark: Bookmark) => void;
 };
 
-export function BookmarkCardSmall({ bookmark, onEdit, onDelete }: BookmarkCardSmallProps) {
+export function BookmarkCardSmall({ bookmark, onEdit, onDelete, onToggleFavorite }: BookmarkCardSmallProps) {
   const domain = new URL(bookmark.url).hostname;
   const [faviconError, setFaviconError] = useState(false);
 
@@ -55,7 +56,19 @@ export function BookmarkCardSmall({ bookmark, onEdit, onDelete }: BookmarkCardSm
             <p className="truncate text-xs text-muted-foreground">{domain}</p>
           </div>
         </a>
-        <DropdownMenu>
+        <div className="flex items-center">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7 flex-shrink-0"
+            aria-label={bookmark.favorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={bookmark.favorite === true}
+            onClick={() => onToggleFavorite(bookmark)}
+          >
+            <Star className={bookmark.favorite ? 'h-4 w-4 fill-primary text-primary' : 'h-4 w-4'} />
+          </Button>
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0">
               <MoreVertical className="h-4 w-4" />
@@ -72,7 +85,8 @@ export function BookmarkCardSmall({ bookmark, onEdit, onDelete }: BookmarkCardSm
               <span>Delete</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
-        </DropdownMenu>
+          </DropdownMenu>
+        </div>
       </CardHeader>
       <CardContent className="flex-grow p-3 pt-0">
         <div className="flex flex-wrap gap-1">
