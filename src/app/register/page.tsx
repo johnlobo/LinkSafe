@@ -11,7 +11,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { getErrorMessage } from '@/lib/errors';
+import { getAuthErrorMessage } from '@/lib/auth-errors';
+import { es } from '@/lib/i18n/es';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -31,8 +32,8 @@ export default function RegisterPage() {
     } catch (error: unknown) {
       toast({
         variant: 'destructive',
-        title: 'Registration Failed',
-        description: getErrorMessage(error, 'An unexpected error occurred.'),
+        title: es.auth.registerFailed,
+        description: getAuthErrorMessage(error, es.common.unexpectedError),
       });
     } finally {
       setIsLoading(false);
@@ -46,17 +47,17 @@ export default function RegisterPage() {
           <div className="mx-auto mb-4">
             <Logo />
           </div>
-          <CardTitle className="text-3xl font-bold">Create an Account</CardTitle>
-          <CardDescription>Start organizing your digital life with LinkSafe.</CardDescription>
+          <CardTitle className="text-3xl font-bold">{es.auth.createAccount}</CardTitle>
+          <CardDescription>{es.auth.registerDescription}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Name</Label>
+              <Label htmlFor="name">{es.auth.name}</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Your Name"
+                placeholder={es.auth.yourName}
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -65,7 +66,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{es.auth.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -78,7 +79,7 @@ export default function RegisterPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{es.auth.password}</Label>
               <Input
                 id="password"
                 type="password"
@@ -92,13 +93,13 @@ export default function RegisterPage() {
             </div>
             <Button type="submit" className="w-full text-base font-semibold" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Create Account
+              {es.auth.register}
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            Already have an account?{' '}
+            {es.auth.alreadyRegistered}{' '}
             <Link href="/login" className="underline" prefetch={false}>
-              Login
+              {es.auth.login}
             </Link>
           </div>
         </CardContent>

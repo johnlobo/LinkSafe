@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import type { Bookmark } from '@/lib/types';
+import { es } from '@/lib/i18n/es';
 
 type BookmarkCardProps = {
   bookmark: Bookmark;
@@ -36,7 +37,7 @@ export function BookmarkCard({ bookmark, onEdit, onDelete, onToggleFavorite }: B
             {bookmark.favicon && !faviconError ? (
               <img
                 src={bookmark.favicon}
-                alt={`${bookmark.title} favicon`}
+                alt={`Icono de ${bookmark.title}`}
                 width={20}
                 height={20}
                 className="object-contain"
@@ -66,7 +67,7 @@ export function BookmarkCard({ bookmark, onEdit, onDelete, onToggleFavorite }: B
             variant="ghost"
             size="icon"
             className="h-8 w-8 flex-shrink-0"
-            aria-label={bookmark.favorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-label={bookmark.favorite ? es.bookmarks.removeFavorite : es.bookmarks.addFavorite}
             aria-pressed={bookmark.favorite === true}
             onClick={() => onToggleFavorite(bookmark)}
           >
@@ -76,17 +77,17 @@ export function BookmarkCard({ bookmark, onEdit, onDelete, onToggleFavorite }: B
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
               <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">More options</span>
+              <span className="sr-only">{es.bookmarks.moreOptions}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(bookmark)}>
               <Edit className="mr-2 h-4 w-4" />
-              <span>Edit</span>
+              <span>{es.common.edit}</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(bookmark.id)} className="text-destructive focus:text-destructive">
               <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete</span>
+              <span>{es.common.delete}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
           </DropdownMenu>

@@ -1,6 +1,8 @@
 # Biblioteca privada de prompts
 
-Estado: plan aprobado, implementación por fases.
+Estado: MVP implementado; pendiente de validación final y publicación.
+
+Checkpoint de seguridad: el 27 de septiembre de 2026 el usuario confirmó la publicación manual de `firestore.rules` y la verificación con dos cuentas distintas.
 
 ## Objetivo
 
@@ -125,14 +127,14 @@ El despliegue de reglas será manual. Codex preparará el contenido exacto y el 
 
 ## Fases de implementación
 
-1. Corregir privacidad de etiquetas y añadir favoritos, normalización y validación HTTP/HTTPS a Enlaces.
-2. Preparar y probar reglas estrictas de Firestore; realizar el checkpoint de publicación manual.
-3. Traducir la interfaz y extraer el shell compartido con navegación de escritorio y móvil.
-4. Crear infraestructura, colección y consultas en tiempo real de Prompts.
-5. Implementar búsqueda, filtros, contadores y tres modos de visualización.
-6. Implementar creación, detalle, edición, eliminación y protección de cambios sin guardar.
-7. Añadir el segundo bookmarklet y su captura segura mediante `postMessage`.
-8. Completar pruebas, documentación, build, release y verificación de despliegue.
+- [x] Corregir privacidad de etiquetas y añadir favoritos, normalización y validación HTTP/HTTPS a Enlaces.
+- [x] Preparar y probar reglas estrictas de Firestore; realizar el checkpoint de publicación manual.
+- [x] Traducir la interfaz y extraer el shell compartido con navegación de escritorio y móvil.
+- [x] Crear infraestructura, colección y consultas en tiempo real de Prompts.
+- [x] Implementar búsqueda, filtros, contadores y tres modos de visualización.
+- [x] Implementar creación, detalle, edición, eliminación y protección de cambios sin guardar.
+- [x] Añadir el segundo bookmarklet y su captura segura mediante `postMessage`.
+- [ ] Completar pruebas, documentación, build, release y verificación de despliegue.
 
 La primera publicación compatible elimina las consultas globales de Enlaces antes de endurecer manualmente sus reglas.
 

@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { es } from '@/lib/i18n/es';
 
 type TagInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> & {
   value: string[];
@@ -126,7 +127,7 @@ export function TagInput({ value: tags, onChange, allTags, placeholder, ...props
             }}
           >
             <X size={12} />
-            <span className="sr-only">Remove {tag}</span>
+            <span className="sr-only">{es.tags.remove(tag)}</span>
           </button>
         </Badge>
       ))}
@@ -153,7 +154,7 @@ export function TagInput({ value: tags, onChange, allTags, placeholder, ...props
           <Command shouldFilter={false} value={selectedSuggestion} onValueChange={setSelectedSuggestion}>
             <CommandList>
               <CommandEmpty>
-                {inputValue ? `Press Enter to add "${inputValue}"` : 'Type to see suggestions.'}
+                {inputValue ? es.tags.add(inputValue) : es.tags.suggestions}
               </CommandEmpty>
               <CommandGroup>
                 {filteredSuggestions.map((tag) => (

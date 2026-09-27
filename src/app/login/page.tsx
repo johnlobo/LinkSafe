@@ -11,7 +11,8 @@ import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { getErrorMessage } from '@/lib/errors';
+import { getAuthErrorMessage } from '@/lib/auth-errors';
+import { es } from '@/lib/i18n/es';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -31,8 +32,8 @@ export default function LoginPage() {
     } catch (error: unknown) {
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: getErrorMessage(error, 'An unexpected error occurred.'),
+        title: es.auth.loginFailed,
+        description: getAuthErrorMessage(error, es.common.unexpectedError),
       });
     } finally {
       setIsLoading(false);
@@ -46,13 +47,13 @@ export default function LoginPage() {
           <div className="mx-auto mb-4">
             <Logo />
           </div>
-          <CardTitle className="text-3xl font-bold">Welcome Back</CardTitle>
-          <CardDescription>Sign in to access your bookmarks.</CardDescription>
+          <CardTitle className="text-3xl font-bold">{es.auth.welcomeBack}</CardTitle>
+          <CardDescription>{es.auth.loginDescription}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{es.auth.email}</Label>
               <Input
                 id="email"
                 type="email"
@@ -66,9 +67,9 @@ export default function LoginPage() {
             </div>
             <div className="space-y-2">
               <div className="flex items-center">
-                <Label htmlFor="password">Password</Label>
+                <Label htmlFor="password">{es.auth.password}</Label>
                 <Link href="#" className="ml-auto inline-block text-sm underline" prefetch={false}>
-                  Forgot your password?
+                  {es.auth.forgotPassword}
                 </Link>
               </div>
               <Input
@@ -83,13 +84,13 @@ export default function LoginPage() {
             </div>
             <Button type="submit" className="w-full text-base font-semibold" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Login
+              {es.auth.login}
             </Button>
           </form>
           <div className="mt-6 text-center text-sm">
-            Don&apos;t have an account?{' '}
+            {es.auth.noAccount}{' '}
             <Link href="/register" className="underline" prefetch={false}>
-              Sign up
+              {es.auth.register}
             </Link>
           </div>
         </CardContent>

@@ -37,20 +37,28 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Sidebar,
-  SidebarContent as SidebarUiContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarInset,
-  SidebarProvider,
-} from '@/components/ui/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '../logo';
 import { LayoutGrid, List, Rows3 } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { collectMetadataValues, normalizeMetadataValues } from '@/lib/bookmark-utils';
 import { getErrorMessage } from '@/lib/errors';
+import { LibraryShell } from '@/components/library/library-shell';
+import { es } from '@/lib/i18n/es';
+
+type BookmarkSortOrder = 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc';
+type BookmarkViewMode = 'big-cards' | 'small-cards' | 'list';
+
+const VIEW_MODE_KEY = 'linksafe:bookmarks:view-mode';
+const SORT_ORDER_KEY = 'linksafe:bookmarks:sort-order';
+
+function isViewMode(value: string | null): value is BookmarkViewMode {
+  return value === 'big-cards' || value === 'small-cards' || value === 'list';
+}
+
+function isSortOrder(value: string | null): value is BookmarkSortOrder {
+  return value === 'date-desc' || value === 'date-asc' || value === 'title-asc' || value === 'title-desc';
+}
 
 export function MainDashboard() {
   const { user, loading } = useAuth();
@@ -61,15 +69,25 @@ export function MainDashboard() {
   const [searchText, setSearchText] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
-  const [sortOrder, setSortOrder] = useState<'date-desc' | 'date-asc' | 'title-asc' | 'title-desc'>(
-    'date-desc'
-  );
-  const [viewMode, setViewMode] = useState<'big-cards' | 'small-cards' | 'list'>('big-cards');
+  const [sortOrder, setSortOrder] = useState<BookmarkSortOrder>('date-desc');
+  const [viewMode, setViewMode] = useState<BookmarkViewMode>('big-cards');
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
 
   const [editingBookmark, setEditingBookmark] = useState<Bookmark | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'add' | 'edit'>('add');
   const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedView = window.localStorage.getItem(VIEW_MODE_KEY);
+    const savedSort = window.localStorage.getItem(SORT_ORDER_KEY);
+    if (isViewMode(savedView)) setViewMode(savedView);
+    if (isSortOrder(savedSort)) setSortOrder(savedSort);
+    setPreferencesLoaded(true);
+  }, []);
+
+  useEffect(() => { if (preferencesLoaded) window.localStorage.setItem(VIEW_MODE_KEY, viewMode); }, [preferencesLoaded, viewMode]);
+  useEffect(() => { if (preferencesLoaded) window.localStorage.setItem(SORT_ORDER_KEY, sortOrder); }, [preferencesLoaded, sortOrder]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -115,7 +133,7 @@ export function MainDashboard() {
 
   const handleSaveBookmark = async (bookmarkData: Omit<Bookmark, 'id' | 'createdAt'>, id?: string) => {
     if (!user) {
-      toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to save bookmarks.' });
+      toast({ variant: 'destructive', title: es.common.error, description: es.bookmarks.loginRequired });
       return;
     }
 
@@ -132,7 +150,7 @@ export function MainDashboard() {
         // Edit
         const bookmarkRef = doc(db, 'bookmarks', id);
         await updateDoc(bookmarkRef, dataToSave);
-        toast({ title: 'Success', description: 'Bookmark updated.' });
+        toast({ title: es.common.success, description: es.bookmarks.updated });
       } else {
         // Add
         await addDoc(collection(db, 'bookmarks'), {
@@ -141,11 +159,11 @@ export function MainDashboard() {
           userId: user.uid,
           createdAt: serverTimestamp(),
         });
-        toast({ title: 'Success', description: 'Bookmark added.' });
+        toast({ title: es.common.success, description: es.bookmarks.added });
       }
       setDialogOpen(false);
     } catch (error: unknown) {
-      toast({ variant: 'destructive', title: 'Error', description: getErrorMessage(error, 'An unexpected error occurred.') });
+      toast({ variant: 'destructive', title: es.common.error, description: getErrorMessage(error, es.common.unexpectedError) });
     }
   };
 
@@ -171,7 +189,7 @@ export function MainDashboard() {
         favorite: !bookmark.favorite,
       });
     } catch (error: unknown) {
-      toast({ variant: 'destructive', title: 'Error', description: getErrorMessage(error, 'An unexpected error occurred.') });
+      toast({ variant: 'destructive', title: es.common.error, description: getErrorMessage(error, es.common.unexpectedError) });
     }
   };
 
@@ -180,11 +198,11 @@ export function MainDashboard() {
     try {
       await deleteDoc(doc(db, 'bookmarks', pendingDeleteId));
       toast({
-        title: 'Bookmark Deleted',
-        description: 'The bookmark has been removed from your list.',
+        title: es.bookmarks.deletedTitle,
+        description: es.bookmarks.deletedDescription,
       });
     } catch (error: unknown) {
-      toast({ variant: 'destructive', title: 'Error', description: getErrorMessage(error, 'An unexpected error occurred.') });
+      toast({ variant: 'destructive', title: es.common.error, description: getErrorMessage(error, es.common.unexpectedError) });
     } finally {
       setPendingDeleteId(null);
     }
@@ -198,6 +216,16 @@ export function MainDashboard() {
     () => bookmarks.filter((bookmark) => bookmark.favorite === true).length,
     [bookmarks]
   );
+
+  const tagCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const bookmark of bookmarks) {
+      for (const tag of new Set(bookmark.tags.map((value) => value.trim().toLocaleLowerCase('es')))) {
+        if (tag) counts[tag] = (counts[tag] ?? 0) + 1;
+      }
+    }
+    return counts;
+  }, [bookmarks]);
 
   const filteredBookmarks = useMemo(() => {
     return bookmarks
@@ -241,51 +269,49 @@ export function MainDashboard() {
   }
 
   return (
-    <SidebarProvider>
-      <Sidebar>
-        <SidebarHeader>
-          <Logo />
-        </SidebarHeader>
-        <SidebarUiContent>
-          <SidebarContent
-            allTags={allCurrentUserTags}
-            selectedTags={selectedTags}
-            setSelectedTags={setSelectedTags}
-            showFavoritesOnly={showFavoritesOnly}
-            setShowFavoritesOnly={setShowFavoritesOnly}
-            totalCount={bookmarks.length}
-            favoriteCount={favoriteCount}
-          />
-        </SidebarUiContent>
-        <SidebarFooter>
-          <p className="px-4 py-2 text-xs text-muted-foreground">
-            v{process.env.NEXT_PUBLIC_APP_VERSION}
-          </p>
-        </SidebarFooter>
-      </Sidebar>
-      <SidebarInset>
-        <Header setSearchText={setSearchText} openAddDialog={openAddDialog} />
+    <LibraryShell
+      activeLibrary="bookmarks"
+      header={(
+        <Header
+          setSearchText={setSearchText}
+          searchText={searchText}
+          onCreate={openAddDialog}
+          searchPlaceholder={es.bookmarks.search}
+          createLabel={es.bookmarks.add}
+        />
+      )}
+      sidebarContent={(
+        <SidebarContent
+          allTags={allCurrentUserTags}
+          selectedTags={selectedTags}
+          setSelectedTags={setSelectedTags}
+          showFavoritesOnly={showFavoritesOnly}
+          setShowFavoritesOnly={setShowFavoritesOnly}
+          totalCount={bookmarks.length}
+          favoriteCount={favoriteCount}
+          tagCounts={tagCounts}
+        />
+      )}
+    >
         <main className="flex-1 p-4 md:p-6">
           <div className="mb-4 flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-semibold">Your Bookmarks</h1>
+            <h1 className="text-2xl font-semibold">{es.bookmarks.title}</h1>
             <div className='flex items-center gap-2'>
               <ToggleGroup
                 type="single"
                 value={viewMode}
                 onValueChange={(value) => {
-                  if (value === 'big-cards' || value === 'small-cards' || value === 'list') {
-                    setViewMode(value);
-                  }
+                  if (isViewMode(value)) setViewMode(value);
                 }}
-                aria-label="View mode"
+                aria-label={es.bookmarks.viewMode}
               >
-                <ToggleGroupItem value="big-cards" aria-label="Big card view">
+                <ToggleGroupItem value="big-cards" aria-label={es.bookmarks.bigCards}>
                   <LayoutGrid className="h-4 w-4" />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="small-cards" aria-label="Small card view">
+                <ToggleGroupItem value="small-cards" aria-label={es.bookmarks.smallCards}>
                   <Rows3 className="h-4 w-4" />
                 </ToggleGroupItem>
-                <ToggleGroupItem value="list" aria-label="List view">
+                <ToggleGroupItem value="list" aria-label={es.bookmarks.list}>
                   <List className="h-4 w-4" />
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -294,24 +320,17 @@ export function MainDashboard() {
                 <Select
                   value={sortOrder}
                   onValueChange={(value) => {
-                    if (
-                      value === 'date-desc' ||
-                      value === 'date-asc' ||
-                      value === 'title-asc' ||
-                      value === 'title-desc'
-                    ) {
-                      setSortOrder(value);
-                    }
+                    if (isSortOrder(value)) setSortOrder(value);
                   }}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Sort by..." />
+                    <SelectValue placeholder={es.bookmarks.sort} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="date-desc">Newest First</SelectItem>
-                    <SelectItem value="date-asc">Oldest First</SelectItem>
-                    <SelectItem value="title-asc">Title (A-Z)</SelectItem>
-                    <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+                    <SelectItem value="date-desc">{es.bookmarks.newest}</SelectItem>
+                    <SelectItem value="date-asc">{es.bookmarks.oldest}</SelectItem>
+                    <SelectItem value="title-asc">{es.bookmarks.titleAsc}</SelectItem>
+                    <SelectItem value="title-desc">{es.bookmarks.titleDesc}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -326,8 +345,6 @@ export function MainDashboard() {
             viewMode={viewMode}
           />
         </main>
-      </SidebarInset>
-
       <AddBookmarkDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
@@ -340,20 +357,20 @@ export function MainDashboard() {
       <AlertDialog open={!!pendingDeleteId} onOpenChange={(open) => { if (!open) setPendingDeleteId(null); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete bookmark?</AlertDialogTitle>
+            <AlertDialogTitle>{es.bookmarks.deleteTitle}</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone.
+              {es.bookmarks.deleteDescription}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{es.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-              Delete
+              {es.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-    </SidebarProvider>
+    </LibraryShell>
   );
 }

@@ -7,6 +7,7 @@ import { FilePlus2 } from 'lucide-react';
 import { BookmarkListItem } from './bookmark-list-item';
 import { BookmarkCardSmall } from './bookmark-card-small';
 import { cn } from '@/lib/utils';
+import { es } from '@/lib/i18n/es';
 
 type BookmarkListProps = {
   bookmarks: Bookmark[];
@@ -22,13 +23,13 @@ export function BookmarkList({ bookmarks, onEdit, onDelete, onToggleFavorite, op
     return (
       <div className="flex flex-1 items-center justify-center rounded-lg border-2 border-dashed border-border bg-card/50 p-8 text-center">
         <div>
-          <h2 className="text-2xl font-semibold tracking-tight">No bookmarks found</h2>
+          <h2 className="text-2xl font-semibold tracking-tight">{es.bookmarks.noResults}</h2>
           <p className="mt-2 text-muted-foreground">
-            It looks like you haven&apos;t added any bookmarks yet, or none match your current filters.
+            {es.bookmarks.noResultsDescription}
           </p>
           <Button className="mt-6" onClick={openAddDialog}>
             <FilePlus2 className="mr-2 h-4 w-4" />
-            Add Your First Bookmark
+            {es.bookmarks.addFirst}
           </Button>
         </div>
       </div>

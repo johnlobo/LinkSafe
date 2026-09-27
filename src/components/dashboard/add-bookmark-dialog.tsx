@@ -23,13 +23,14 @@ import { useToast } from '@/hooks/use-toast';
 import type { Bookmark } from '@/lib/types';
 import { TagInput } from './tag-input';
 import { isHttpUrl } from '@/lib/bookmark-utils';
+import { es } from '@/lib/i18n/es';
 
 const bookmarkSchema = z.object({
   url: z
     .string()
-    .url({ message: 'Please enter a valid URL.' })
-    .refine(isHttpUrl, { message: 'Only HTTP and HTTPS URLs are allowed.' }),
-  title: z.string().min(1, { message: 'Title is required.' }),
+    .url({ message: es.bookmarks.urlInvalid })
+    .refine(isHttpUrl, { message: es.bookmarks.urlProtocol }),
+  title: z.string().min(1, { message: es.bookmarks.titleRequired }),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -92,7 +93,7 @@ export function AddBookmarkDialog({
         const result = await autoFillBookmarkDetails({ url });
         if (result.title) {
           form.setValue('title', result.title, { shouldValidate: true });
-          toast({ title: 'Details fetched', description: result.title });
+          toast({ title: es.bookmarks.detailsFetched, description: result.title });
         }
       } catch (error) {
         // Silently ignore — user can fill title manually
@@ -128,8 +129,8 @@ export function AddBookmarkDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[525px]" onCloseAutoFocus={(e) => e.preventDefault()}>
         <DialogHeader>
-          <DialogTitle>{mode === 'add' ? 'Add a new bookmark' : 'Edit bookmark'}</DialogTitle>
-          <DialogDescription>Fill in the details below. Click save when you&apos;re done.</DialogDescription>
+          <DialogTitle>{mode === 'add' ? es.bookmarks.addDialogTitle : es.bookmarks.editDialogTitle}</DialogTitle>
+          <DialogDescription>{es.bookmarks.formDescription}</DialogDescription>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -138,7 +139,7 @@ export function AddBookmarkDialog({
               name="url"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL</FormLabel>
+                  <FormLabel>{es.bookmarks.url}</FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -155,9 +156,9 @@ export function AddBookmarkDialog({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>{es.bookmarks.titleField}</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. My Favorite Example" {...field} />
+                    <Input placeholder="Ej. Documentación de Firebase" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -168,9 +169,9 @@ export function AddBookmarkDialog({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{es.bookmarks.description}</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="A short description of the website." {...field} />
+                    <Textarea placeholder={es.bookmarks.descriptionPlaceholder} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -181,12 +182,12 @@ export function AddBookmarkDialog({
               name="tags"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Tags</FormLabel>
+                  <FormLabel>{es.bookmarks.tags}</FormLabel>
                   <FormControl>
                     <TagInput
                       {...field}
                       allTags={allTags}
-                      placeholder="Add a tag..."
+                      placeholder={es.bookmarks.tagPlaceholder}
                       value={field.value || []}
                       onChange={(tags) => field.onChange(tags)}
                     />
@@ -197,11 +198,11 @@ export function AddBookmarkDialog({
             />
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-                Cancel
+                {es.common.cancel}
               </Button>
               <Button type="submit" disabled={isFetching}>
                 {isFetching ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Save Bookmark
+                {es.bookmarks.save}
               </Button>
             </DialogFooter>
           </form>

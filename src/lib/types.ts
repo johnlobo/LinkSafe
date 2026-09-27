@@ -9,3 +9,19 @@ export type Bookmark = {
   favorite?: boolean;
   createdAt: string; // ISO date string
 };
+
+export type Prompt = {
+  id: string;
+  userId: string;
+  title: string;
+  content: string;
+  tags: string[];
+  notes?: string;
+  sourceUrl?: string;
+  author?: string;
+  language?: string;
+  model?: string;
+  favorite: boolean;
+  createdAt: string;
+  updatedAt: string;
+};

@@ -21,13 +21,14 @@ import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { isHttpUrl, normalizeMetadataValues } from '@/lib/bookmark-utils';
 import { getErrorMessage } from '@/lib/errors';
+import { es } from '@/lib/i18n/es';
 
 const schema = z.object({
   url: z
     .string()
-    .url({ message: 'Please enter a valid URL.' })
-    .refine(isHttpUrl, { message: 'Only HTTP and HTTPS URLs are allowed.' }),
-  title: z.string().min(1, { message: 'Title is required.' }),
+    .url({ message: es.bookmarks.urlInvalid })
+    .refine(isHttpUrl, { message: es.bookmarks.urlProtocol }),
+  title: z.string().min(1, { message: es.bookmarks.titleRequired }),
   description: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
@@ -118,8 +119,8 @@ export default function AddFromBrowserPage() {
     } catch (error: unknown) {
       toast({
         variant: 'destructive',
-        title: 'Could not save bookmark',
-        description: getErrorMessage(error, 'An unexpected error occurred.'),
+        title: es.capture.saveError,
+        description: getErrorMessage(error, es.common.unexpectedError),
       });
     } finally {
       setIsSaving(false);
@@ -136,9 +137,9 @@ export default function AddFromBrowserPage() {
         <Card className="w-full max-w-md text-center shadow-xl">
           <CardContent className="space-y-4 p-8">
             <CheckCircle2 className="mx-auto h-12 w-12 text-primary" />
-            <h1 className="text-2xl font-semibold">Bookmark saved</h1>
-            <p className="text-sm text-muted-foreground">You can return to the page you were viewing.</p>
-            <Button variant="outline" onClick={close}>Close</Button>
+            <h1 className="text-2xl font-semibold">{es.capture.savedTitle}</h1>
+            <p className="text-sm text-muted-foreground">{es.capture.savedDescription}</p>
+            <Button variant="outline" onClick={close}>{es.common.close}</Button>
           </CardContent>
         </Card>
       </main>
@@ -151,33 +152,33 @@ export default function AddFromBrowserPage() {
         <CardHeader className="relative">
           <Logo />
           <Button type="button" size="icon" variant="ghost" className="absolute right-3 top-3" onClick={close}>
-            <X className="h-4 w-4" /><span className="sr-only">Close</span>
+            <X className="h-4 w-4" /><span className="sr-only">{es.common.close}</span>
           </Button>
-          <CardTitle className="pt-3">Save bookmark</CardTitle>
-          <CardDescription>Review the page details before saving.</CardDescription>
+          <CardTitle className="pt-3">{es.capture.title}</CardTitle>
+          <CardDescription>{es.capture.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField control={form.control} name="url" render={({ field }) => (
                 <FormItem>
-                  <FormLabel>URL</FormLabel>
+                  <FormLabel>{es.bookmarks.url}</FormLabel>
                   <FormControl><div className="relative"><Globe className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input {...field} onBlur={handleUrlBlur} className="pl-9" /></div></FormControl>
                   <FormMessage />
                 </FormItem>
               )} />
               <FormField control={form.control} name="title" render={({ field }) => (
-                <FormItem><FormLabel>Title</FormLabel><FormControl><Input {...field} autoFocus /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>{es.bookmarks.titleField}</FormLabel><FormControl><Input {...field} autoFocus /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="description" render={({ field }) => (
-                <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea placeholder="Optional note about this page" {...field} /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>{es.bookmarks.description}</FormLabel><FormControl><Textarea placeholder={es.bookmarks.descriptionPlaceholder} {...field} /></FormControl><FormMessage /></FormItem>
               )} />
               <FormField control={form.control} name="tags" render={({ field }) => (
-                <FormItem><FormLabel>Tags</FormLabel><FormControl><TagInput {...field} allTags={allTags} value={field.value || []} onChange={field.onChange} placeholder="Add a tag..." /></FormControl><FormMessage /></FormItem>
+                <FormItem><FormLabel>{es.bookmarks.tags}</FormLabel><FormControl><TagInput {...field} allTags={allTags} value={field.value || []} onChange={field.onChange} placeholder={es.bookmarks.tagPlaceholder} /></FormControl><FormMessage /></FormItem>
               )} />
               <div className="flex justify-end gap-2 pt-2">
-                <Button type="button" variant="ghost" onClick={close}>Cancel</Button>
-                <Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save bookmark</Button>
+                <Button type="button" variant="ghost" onClick={close}>{es.common.cancel}</Button>
+                <Button type="submit" disabled={isSaving}>{isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}{es.bookmarks.save}</Button>
               </div>
             </form>
           </Form>

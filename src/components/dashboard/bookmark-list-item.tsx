@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Bookmark } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { es } from '@/lib/i18n/es';
 
 type BookmarkListItemProps = {
   bookmark: Bookmark;
@@ -38,7 +39,7 @@ export function BookmarkListItem({ bookmark, onEdit, onDelete, onToggleFavorite 
         {bookmark.favicon && !faviconError ? (
           <img
             src={bookmark.favicon}
-            alt={`${bookmark.title} favicon`}
+            alt={`Icono de ${bookmark.title}`}
             width={16}
             height={16}
             className="object-contain"
@@ -79,7 +80,7 @@ export function BookmarkListItem({ bookmark, onEdit, onDelete, onToggleFavorite 
           variant="ghost"
           size="icon"
           className="mr-1 h-8 w-8"
-          aria-label={bookmark.favorite ? 'Remove from favorites' : 'Add to favorites'}
+          aria-label={bookmark.favorite ? es.bookmarks.removeFavorite : es.bookmarks.addFavorite}
           aria-pressed={bookmark.favorite === true}
           onClick={() => onToggleFavorite(bookmark)}
         >
@@ -89,17 +90,17 @@ export function BookmarkListItem({ bookmark, onEdit, onDelete, onToggleFavorite 
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">More options</span>
+              <span className="sr-only">{es.bookmarks.moreOptions}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={() => onEdit(bookmark)}>
               <Edit className="mr-2 h-4 w-4" />
-              <span>Edit</span>
+              <span>{es.common.edit}</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => onDelete(bookmark.id)} className="text-destructive focus:text-destructive">
               <Trash2 className="mr-2 h-4 w-4" />
-              <span>Delete</span>
+              <span>{es.common.delete}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
