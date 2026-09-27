@@ -1,15 +1,117 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /bookmarks/{bookmarkId} {
-      // Allow any authenticated user to read and list bookmarks for tag discovery.
-      allow read, list: if request.auth != null;
-      
-      // Only allow the user who created the bookmark to update or delete it.
-      allow update, delete: if request.auth.uid == resource.data.userId;
+    function signedIn() {
+      return request.auth != null;
+    }
 
-      // Allow any authenticated user to create a bookmark, as long as they set the userId correctly.
-      allow create: if request.auth.uid == request.resource.data.userId;
+    function isOwner(data) {
+      return signedIn() && data.userId == request.auth.uid;
+    }
+
+    function hasValidOptionalString(data, field, maxLength) {
+      return !(field in data) ||
+        (data[field] is string && data[field].size() <= maxLength);
+    }
+
+    function hasValidOptionalWebUrl(data, field, maxLength) {
+      return !(field in data) ||
+        (data[field] is string &&
+          data[field].size() <= maxLength &&
+          data[field].matches('^https?://.*'));
+    }
+
+    function validTagAt(tags, index) {
+      return tags.size() <= index ||
+        (tags[index] is string && tags[index].size() > 0 && tags[index].size() <= 50);
+    }
+
+    function validPromptTags(tags) {
+      return tags is list &&
+        tags.size() <= 20 &&
+        validTagAt(tags, 0) && validTagAt(tags, 1) &&
+        validTagAt(tags, 2) && validTagAt(tags, 3) &&
+        validTagAt(tags, 4) && validTagAt(tags, 5) &&
+        validTagAt(tags, 6) && validTagAt(tags, 7) &&
+        validTagAt(tags, 8) && validTagAt(tags, 9) &&
+        validTagAt(tags, 10) && validTagAt(tags, 11) &&
+        validTagAt(tags, 12) && validTagAt(tags, 13) &&
+        validTagAt(tags, 14) && validTagAt(tags, 15) &&
+        validTagAt(tags, 16) && validTagAt(tags, 17) &&
+        validTagAt(tags, 18) && validTagAt(tags, 19);
+    }
+
+    function validBookmark(data) {
+      return data.keys().hasAll(['userId', 'url', 'title', 'tags', 'createdAt']) &&
+        data.keys().hasOnly([
+          'userId', 'url', 'title', 'description', 'tags', 'favicon', 'favorite', 'createdAt'
+        ]) &&
+        data.userId is string &&
+        data.url is string &&
+        data.url.matches('^https?://.*') &&
+        data.title is string &&
+        data.title.size() > 0 &&
+        data.tags is list &&
+        data.createdAt is timestamp &&
+        hasValidOptionalString(data, 'description', 5000) &&
+        hasValidOptionalWebUrl(data, 'favicon', 2048) &&
+        (!('favorite' in data) || data.favorite is bool);
+    }
+
+    function validPrompt(data) {
+      return data.keys().hasAll([
+          'userId', 'title', 'content', 'tags', 'favorite', 'createdAt', 'updatedAt'
+        ]) &&
+        data.keys().hasOnly([
+          'userId', 'title', 'content', 'tags', 'notes', 'sourceUrl', 'author',
+          'language', 'model', 'favorite', 'createdAt', 'updatedAt'
+        ]) &&
+        data.userId is string &&
+        data.title is string &&
+        data.title.size() > 0 &&
+        data.title.size() <= 200 &&
+        data.content is string &&
+        data.content.size() > 0 &&
+        data.content.size() <= 50000 &&
+        validPromptTags(data.tags) &&
+        data.favorite is bool &&
+        data.createdAt is timestamp &&
+        data.updatedAt is timestamp &&
+        hasValidOptionalString(data, 'notes', 5000) &&
+        hasValidOptionalWebUrl(data, 'sourceUrl', 2048) &&
+        hasValidOptionalString(data, 'author', 200) &&
+        hasValidOptionalString(data, 'language', 200) &&
+        hasValidOptionalString(data, 'model', 200);
+    }
+
+    match /bookmarks/{bookmarkId} {
+      allow read, delete: if isOwner(resource.data);
+
+      allow create: if isOwner(request.resource.data) &&
+        validBookmark(request.resource.data) &&
+        request.resource.data.createdAt == request.time;
+
+      allow update: if isOwner(resource.data) &&
+        isOwner(request.resource.data) &&
+        validBookmark(request.resource.data) &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /prompts/{promptId} {
+      allow read, delete: if isOwner(resource.data);
+
+      allow create: if isOwner(request.resource.data) &&
+        validPrompt(request.resource.data) &&
+        request.resource.data.createdAt == request.time &&
+        request.resource.data.updatedAt == request.time;
+
+      allow update: if isOwner(resource.data) &&
+        isOwner(request.resource.data) &&
+        validPrompt(request.resource.data) &&
+        request.resource.data.userId == resource.data.userId &&
+        request.resource.data.createdAt == resource.data.createdAt &&
+        request.resource.data.updatedAt == request.time;
     }
   }
 }
