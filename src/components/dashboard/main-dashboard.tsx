@@ -47,10 +47,10 @@ import {
 } from '@/components/ui/sidebar';
 import { useToast } from '@/hooks/use-toast';
 import { Logo } from '../logo';
-import { Button } from '../ui/button';
 import { LayoutGrid, List, Rows3 } from 'lucide-react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { collectMetadataValues, normalizeMetadataValues } from '@/lib/bookmark-utils';
+import { getErrorMessage } from '@/lib/errors';
 
 export function MainDashboard() {
   const { user, loading } = useAuth();
@@ -120,7 +120,7 @@ export function MainDashboard() {
     }
 
     try {
-      const dataToSave: any = {
+      const dataToSave: Omit<Bookmark, 'id' | 'createdAt'> = {
         ...bookmarkData,
         tags: normalizeMetadataValues(bookmarkData.tags, allCurrentUserTags),
       };
@@ -144,8 +144,8 @@ export function MainDashboard() {
         toast({ title: 'Success', description: 'Bookmark added.' });
       }
       setDialogOpen(false);
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } catch (error: unknown) {
+      toast({ variant: 'destructive', title: 'Error', description: getErrorMessage(error, 'An unexpected error occurred.') });
     }
   };
 
@@ -170,8 +170,8 @@ export function MainDashboard() {
       await updateDoc(doc(db, 'bookmarks', bookmark.id), {
         favorite: !bookmark.favorite,
       });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } catch (error: unknown) {
+      toast({ variant: 'destructive', title: 'Error', description: getErrorMessage(error, 'An unexpected error occurred.') });
     }
   };
 
@@ -183,8 +183,8 @@ export function MainDashboard() {
         title: 'Bookmark Deleted',
         description: 'The bookmark has been removed from your list.',
       });
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message });
+    } catch (error: unknown) {
+      toast({ variant: 'destructive', title: 'Error', description: getErrorMessage(error, 'An unexpected error occurred.') });
     } finally {
       setPendingDeleteId(null);
     }
@@ -273,7 +273,9 @@ export function MainDashboard() {
                 type="single"
                 value={viewMode}
                 onValueChange={(value) => {
-                  if (value) setViewMode(value as any);
+                  if (value === 'big-cards' || value === 'small-cards' || value === 'list') {
+                    setViewMode(value);
+                  }
                 }}
                 aria-label="View mode"
               >
@@ -289,7 +291,19 @@ export function MainDashboard() {
               </ToggleGroup>
 
               <div className="w-[180px]">
-                <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as any)}>
+                <Select
+                  value={sortOrder}
+                  onValueChange={(value) => {
+                    if (
+                      value === 'date-desc' ||
+                      value === 'date-asc' ||
+                      value === 'title-asc' ||
+                      value === 'title-desc'
+                    ) {
+                      setSortOrder(value);
+                    }
+                  }}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Sort by..." />
                   </SelectTrigger>

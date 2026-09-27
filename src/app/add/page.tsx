@@ -20,6 +20,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { db } from '@/lib/firebase';
 import { isHttpUrl, normalizeMetadataValues } from '@/lib/bookmark-utils';
+import { getErrorMessage } from '@/lib/errors';
 
 const schema = z.object({
   url: z
@@ -114,8 +115,12 @@ export default function AddFromBrowserPage() {
       await addDoc(collection(db, 'bookmarks'), data);
       setSaved(true);
       if (window.opener) window.setTimeout(() => window.close(), 1200);
-    } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Could not save bookmark', description: error.message });
+    } catch (error: unknown) {
+      toast({
+        variant: 'destructive',
+        title: 'Could not save bookmark',
+        description: getErrorMessage(error, 'An unexpected error occurred.'),
+      });
     } finally {
       setIsSaving(false);
     }

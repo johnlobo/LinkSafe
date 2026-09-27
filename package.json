@@ -8,7 +8,8 @@
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:rules": "firebase emulators:exec --project demo-linksafe --only firestore --config firebase.json \"vitest run --config vitest.rules.config.mjs\""
@@ -61,10 +62,13 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.7",
     "@firebase/rules-unit-testing": "^5.0.2",
     "@types/node": "^20.14.10",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^15.5.15",
     "firebase-tools": "^15.31.0",
     "genkit-cli": "^1.27.0",
     "postcss": "^8.4.39",

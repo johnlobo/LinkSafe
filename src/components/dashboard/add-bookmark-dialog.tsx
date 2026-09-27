@@ -113,7 +113,7 @@ export function AddBookmarkDialog({
         setIsFetching(true);
         const details = await autoFillBookmarkDetails({ url });
         favicon = details.favicon;
-      } catch (error) {
+      } catch {
         console.log("Couldn't fetch favicon, but saving bookmark anyway.");
       } finally {
         setIsFetching(false);

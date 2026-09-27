@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getErrorMessage } from '@/lib/errors';
 
 function decodeHtmlEntities(str: string): string {
   return str
@@ -65,9 +66,9 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({ title, favicon });
-  } catch (err: any) {
+  } catch (error: unknown) {
     clearTimeout(tid);
-    console.error('[autofill] error:', err?.message);
+    console.error('[autofill] error:', getErrorMessage(error, 'Unknown error'));
     return NextResponse.json({});
   }
 }

@@ -2,6 +2,7 @@
 
 import {
   User as FirebaseAuthUser,
+  UserCredential,
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
@@ -17,12 +18,21 @@ type User = {
   name: string | null;
 };
 
+type LoginCredentials = {
+  email: string;
+  password: string;
+};
+
+type RegisterCredentials = LoginCredentials & {
+  name: string;
+};
+
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (credentials: any) => Promise<any>;
+  login: (credentials: LoginCredentials) => Promise<UserCredential>;
   logout: () => Promise<void>;
-  register: (credentials: any) => Promise<any>;
+  register: (credentials: RegisterCredentials) => Promise<UserCredential>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,11 +58,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const login = (credentials: any) => {
+  const login = (credentials: LoginCredentials) => {
     return signInWithEmailAndPassword(auth, credentials.email, credentials.password);
   };
 
-  const register = async (credentials: any) => {
+  const register = async (credentials: RegisterCredentials) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       credentials.email,

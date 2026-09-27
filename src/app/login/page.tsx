@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -27,11 +28,11 @@ export default function LoginPage() {
       await login({ email, password });
       const requestedPath = new URLSearchParams(window.location.search).get('next');
       router.push(requestedPath?.startsWith('/') && !requestedPath.startsWith('//') ? requestedPath : '/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: 'Login Failed',
-        description: error.message,
+        description: getErrorMessage(error, 'An unexpected error occurred.'),
       });
     } finally {
       setIsLoading(false);

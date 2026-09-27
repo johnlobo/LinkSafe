@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Logo } from '@/components/logo';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { getErrorMessage } from '@/lib/errors';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -27,11 +28,11 @@ export default function RegisterPage() {
     try {
       await register({ name, email, password });
       router.push('/');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: 'destructive',
         title: 'Registration Failed',
-        description: error.message,
+        description: getErrorMessage(error, 'An unexpected error occurred.'),
       });
     } finally {
       setIsLoading(false);
