@@ -1,6 +1,6 @@
 # Biblioteca privada de prompts
 
-Estado: MVP implementado; pendiente de validación final y publicación.
+Estado: MVP implementado y publicado en `v0.1.7` el 27 de septiembre de 2026.
 
 Checkpoint de seguridad: el 27 de septiembre de 2026 el usuario confirmó la publicación manual de `firestore.rules` y la verificación con dos cuentas distintas.
 
@@ -134,7 +134,7 @@ El despliegue de reglas será manual. Codex preparará el contenido exacto y el 
 - [x] Implementar búsqueda, filtros, contadores y tres modos de visualización.
 - [x] Implementar creación, detalle, edición, eliminación y protección de cambios sin guardar.
 - [x] Añadir el segundo bookmarklet y su captura segura mediante `postMessage`.
-- [ ] Completar pruebas, documentación, build, release y verificación de despliegue.
+- [x] Completar pruebas, documentación, build, release y verificación de despliegue.
 
 La primera publicación compatible elimina las consultas globales de Enlaces antes de endurecer manualmente sus reglas.
 
